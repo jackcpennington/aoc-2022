@@ -30,11 +30,7 @@ for dirr, dist in nums:
 print(len(visited))
 
 
-
-
-
-h = (0,0)
-t = [(0,0) for _ in range(9)]
+t = [(0,0) for _ in range(10)]
 visited = set()
 
 for dirr, dist in nums:
@@ -42,22 +38,15 @@ for dirr, dist in nums:
     for _ in range(dist):
         match dirr:
             case 'R':
-                h = (h[0], h[1]+1)
+                t[0] = (t[0][0], t[0][1]+1)
             case 'U':
-                h = (h[0]-1, h[1])
+                t[0] = (t[0][0]-1, t[0][1])
             case 'L':
-                h = (h[0], h[1]-1)
+                t[0] = (t[0][0], t[0][1]-1)
             case 'D':
-                h = (h[0]+1, h[1])
+                t[0] = (t[0][0]+1, t[0][1])
 
-        h_neighbours = [(h[0]+x, h[1]+y) for x in range(-1,2) for y in range(-1,2)]
-
-        if t[0] not in h_neighbours:
-            tt = (t[0][0] + h[0], t[0][1] + h[1])
-            t[0] = (h[0] if tt[0]%2 != 0 else tt[0]//2,
-                    h[1] if tt[1]%2 != 0 else tt[1]//2)
-
-        for i in range(1,9):
+        for i in range(1,10):
             neighbours = [(t[i-1][0]+x, t[i-1][1]+y) for x in range(-1,2) for y in range(-1,2)]
 
             if t[i] not in neighbours:
