@@ -1,10 +1,11 @@
-import heapq
+from collections import deque
+
 with open("day12/input.txt", 'r') as f:
     graph = [list(line.strip()) for line in f.readlines()]
 
 alpha = "abcdefghijklmnopqrstuvwxyz"
 
-def dijikstra(graph, source, target):
+def bfs(graph, source, target):
 
     def neighbours(i, j):
         ns = set()
@@ -19,52 +20,53 @@ def dijikstra(graph, source, target):
 
         nss = [b for b, _ in filter(lambda z: alpha.index(z[1]) <= alpha.index(graph[i][j])+1, ns)]
         return nss
-    dist = dict()
-    prev = dict()
-    Q = []
 
-    for i in range(len(graph)):
-        for j in range(len(graph[0])):
-            v = (i,j)
-            dist[v] = float('inf')
-            prev[v] = None
+    Q = deque()
+    explored = {source}
+    parents = {source: None}
+    Q.append(source)
 
-    dist[source] = 0
-    heapq.heappush(Q, (dist[source], source))
 
     while Q:
-        _, u= heapq.heappop(Q)
+        v = Q.popleft()
 
-        if u == target:
-            s = []
-            if prev[u] != None or u == source:
-                while u:
-                    s.append(u)
-                    u = prev[u]
-            return dist[target], s
+        if v == target:
+            path = [v]
+            parent = parents[v]
+            while parent:
+                path.append(parent)
+                parent = parents[parent]
+            return len(path)-1, path
 
-        for v in neighbours(*u):
-            i, j = v
-            alt = dist[u] + 1
-            if alt < dist[v]:
-                dist[v] = alt
-                prev[v] = u
-                heapq.heappush(Q, (dist[v], v))
-    return float('inf'), prev
+        for u in neighbours(*v):
+            if u not in explored:
+                parents[u] = v
+                explored.add(u)
+                Q.append(u)
+
+    return float('inf'), -1
 
 import cProfile
 
 with cProfile.Profile() as pr:
 
+
     source = [(i,j) for i in range(len(graph)) for j in range(len(graph[0])) if graph[i][j] == 'S'][0]
     target = [(i,j) for i in range(len(graph)) for j in range(len(graph[0])) if graph[i][j] == 'E'][0]
-    
+   
     graph[source[0]][source[1]] = 'a'
     graph[target[0]][target[1]] = 'z'
     
+    #for row in graph:
+    #    print("".join(row))
+    #print()
     
-    steps, path = dijikstra(graph, source, target)
     
+    steps, path = bfs(graph, source, target)
+    
+    print (steps)
+    
+    #
     #from copy import deepcopy
     #
     #graph2 = deepcopy(graph)
@@ -91,12 +93,10 @@ with cProfile.Profile() as pr:
     #
     #for row in graph2:
     #    print("".join(row))
-    #
-    print(steps)
     
     sources = [(i,j) for i in range(len(graph)) for j in range(len(graph[0])) if graph[i][j] == 'a']
-    stepss =[dijikstra(graph, source, target)[0] for source in sources]
+    stepss = [bfs(graph, source, target)[0] for source in sources]
     
     print(min(stepss))
-
-pr.print_stats()
+    
+    pr.print_stats()
